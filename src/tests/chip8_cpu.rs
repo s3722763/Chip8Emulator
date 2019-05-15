@@ -49,3 +49,5 @@ fn test_set_index_register() {
 
     assert_eq!(chip.index_register, 746);
 }
+
+//TODO: Implement screen test

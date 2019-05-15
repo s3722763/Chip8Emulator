@@ -5,3 +5,4 @@ authors = ["s3722763 <s3722763@student.rmit.edu.au>"]
 edition = "2018"
 
 [dependencies]
+sdl2 = "0.32.2"
