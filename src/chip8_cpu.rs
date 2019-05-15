@@ -41,7 +41,7 @@ impl System {
         let first =  value & 0xF0;
         let mut address_changed = false;
         let second = self.memory[(address + 1) as usize];
-        println!("New Address: {:x}", address);
+        println!("New Address: {:x}{:x}", value, second);
         match first {
             0x00 => { unimplemented!("Call, display_clear or return"); },
             0x10 => { unimplemented!("Jump to"); },
@@ -58,7 +58,7 @@ impl System {
             0xC0 => { unimplemented!("Set register to random value anded with NN"); },
             0xD0 => { self.draw(value, second); },
             0xE0 => { unimplemented!("Key operations"); },
-            0xF0 => { unimplemented!("Other stuff like timer sound memory stuff and conversion stuff"); },
+            0xF0 => { self.process_0xF0(value, second); },
             _ => {
                 println!("Invalid opcode");
             }
@@ -66,6 +66,24 @@ impl System {
 
         if !address_changed {
             self.program_counter = self.program_counter + 2;
+        }
+    }
+
+    fn process_0xF0(&mut self, first_part: u8, second_part: u8) {
+        match second_part {
+            0x33 => {
+                let register = (first_part & 0xF0) >> 4;
+                let value = self.registers[register as usize];
+                let (hundreds, tens, ones) = encode_to_bcd(value);
+
+                self.memory[self.index_register as usize] = hundreds;
+                self.memory[(self.index_register + 1) as usize] = tens;
+                self.memory[(self.index_register + 2) as usize] = ones;
+            },
+            0x65 => {
+
+            }
+            _ => { unimplemented!("Other 0xF0 opcodes unimplemented"); }
         }
     }
 
@@ -103,7 +121,7 @@ impl System {
                     //Pixel is now a colour
                     //TODO:Implement collision detection
                 }
-                println!("X: {}\tY: {}", x + initial_width as u16, y + initial_height);
+                //println!("X: {}\tY: {}", x + initial_width as u16, y + initial_height);
                 let new_x = x + initial_width as u16;
                 let new_y = y + initial_height;
 
@@ -142,4 +160,13 @@ impl System {
             }
         }
     }
+}
+
+fn encode_to_bcd(value: u8) -> (u8, u8, u8){
+    let hundreds = value / 100;
+    let rest = value % 100;
+    let tens = rest / 10;
+    let ones = rest % 10;
+
+    (hundreds, tens, ones)
 }
