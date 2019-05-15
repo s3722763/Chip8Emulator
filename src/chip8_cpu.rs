@@ -71,6 +71,9 @@ impl System {
 
     fn process_0xF0(&mut self, first_part: u8, second_part: u8) {
         match second_part {
+            0x29 => {
+                
+            },
             0x33 => {
                 let register = (first_part & 0xF0) >> 4;
                 let value = self.registers[register as usize];
@@ -81,9 +84,18 @@ impl System {
                 self.memory[(self.index_register + 2) as usize] = ones;
             },
             0x65 => {
-
+                let last_register = (first_part & 0xF0) >> 4;
+                self.reg_load(last_register);
             }
             _ => { unimplemented!("Other 0xF0 opcodes unimplemented"); }
+        }
+    }
+
+    fn reg_load(&mut self, last_register: u8) {
+        //Inclusive of the last value
+        for register in 0..(last_register + 1) {
+            let value = self.memory[self.index_register as usize];
+            self.registers[register as usize] = value;
         }
     }
 
