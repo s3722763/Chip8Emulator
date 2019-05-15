@@ -32,12 +32,10 @@ fn setup_window() -> (Canvas<Window>, sdl2::EventPump){
 
 fn main() {
     let mut chip8_system: System = System::default();
-    let mut running = true;
 
     chip8_system.load_program(&String::from("pong.rom"));
     //chip8_system.load_program(&String::from("test.rom"));
-
-    println!("{}", 0xB0 >> 4);
+    chip8_system.setup_fontset();
 
     let (mut canvas, mut event_pipe) = setup_window();
 

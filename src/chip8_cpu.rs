@@ -35,6 +35,31 @@ impl Default for System {
 }
 
 impl System {
+    pub fn setup_fontset(&mut self) {
+        let chip8_fontset = [ 
+            0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+            0x20, 0x60, 0x20, 0x20, 0x70, // 1
+            0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+            0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+            0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+            0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+            0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+            0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+            0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+            0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+            0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+            0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+            0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+            0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+            0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+            0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+        ];
+
+        for index in 0..chip8_fontset.len() {
+            self.memory[index] = chip8_fontset[index];
+        }
+    }
+
     pub fn run_op_at(&mut self, address: u16) {
         //TODO: Do check if there is an op code
         let value = self.memory[address as usize];
@@ -72,7 +97,11 @@ impl System {
     fn process_0xF0(&mut self, first_part: u8, second_part: u8) {
         match second_part {
             0x29 => {
-                
+                let register = first_part & 0x0F;
+                let value = self.registers[register as usize];
+                //Is this ok?
+                //The index is always 5 times its value that it wants to represent
+                self.index_register = (value as u16) * 5;
             },
             0x33 => {
                 let register = (first_part & 0xF0) >> 4;
