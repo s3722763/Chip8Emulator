@@ -99,8 +99,21 @@ impl System {
         self.registers[register] += value;
     }
 
-    fn process_0x_00(&mut self, first_part: u8, second_part: u8) {
-        
+    fn process_0x_00(&mut self, first_part: u8, second_part: u8) -> bool{
+        let code_redirect = false;
+
+        match second_part {
+            0xEE => {
+                let new_address = self.stack[self.stack_pointer as usize];
+                self.stack_pointer -= 1;
+
+            },
+            _ => {
+                unimplemented!("0x00 opcode not implemented");
+            }
+        }
+
+        code_redirect
     }
 
     fn process_0x_F0(&mut self, first_part: u8, second_part: u8) {
