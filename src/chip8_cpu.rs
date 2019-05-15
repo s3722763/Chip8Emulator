@@ -68,14 +68,14 @@ impl System {
         let second = self.memory[(address + 1) as usize];
         println!("New Address: {:x}{:x}", value, second);
         match first {
-            0x00 => { unimplemented!("Call, display_clear or return"); },
+            0x00 => { self.process_0x_00(value, second); },
             0x10 => { unimplemented!("Jump to"); },
             0x20 => { self.call(value, second, address);  address_changed = true; },
             0x30 => { unimplemented!("Skip if equal (constant)"); },
             0x40 => { unimplemented!("Skip if not equal (constant)"); },
             0x50 => { unimplemented!("Skip if equal (to register)"); },
             0x60 => { self.set_register_to(value, second); },
-            0x70 => { unimplemented!("Add constant to register value"); },
+            0x70 => { self.add_value_to_register(value, second); },
             0x80 => { unimplemented!("Binary ops and maths"); },
             0x90 => { unimplemented!("Skip if registers not equal"); },
             0xA0 => { self.set_index_register(value, second); },
@@ -83,7 +83,7 @@ impl System {
             0xC0 => { unimplemented!("Set register to random value anded with NN"); },
             0xD0 => { self.draw(value, second); },
             0xE0 => { unimplemented!("Key operations"); },
-            0xF0 => { self.process_0xF0(value, second); },
+            0xF0 => { self.process_0x_F0(value, second); },
             _ => {
                 println!("Invalid opcode");
             }
@@ -94,7 +94,16 @@ impl System {
         }
     }
 
-    fn process_0xF0(&mut self, first_part: u8, second_part: u8) {
+    fn add_value_to_register(&mut self, first: u8, value: u8) {
+        let register = (first & 0x0F) as usize;
+        self.registers[register] += value;
+    }
+
+    fn process_0x_00(&mut self, first_part: u8, second_part: u8) {
+        
+    }
+
+    fn process_0x_F0(&mut self, first_part: u8, second_part: u8) {
         match second_part {
             0x29 => {
                 let register = first_part & 0x0F;
