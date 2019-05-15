@@ -12,7 +12,7 @@ pub struct System {
     sound_timer: u8,
     key: [u8;16],
     //For Emulation
-    stack: [u8;16],
+    stack: [u16;16],
     stack_pointer: u8,
 }
 
@@ -41,11 +41,11 @@ impl System {
         let first =  value & 0xF0;
         let mut address_changed = false;
         let second = self.memory[(address + 1) as usize];
-
+        println!("New Address: {:x}", address);
         match first {
             0x00 => { unimplemented!("Call, display_clear or return"); },
             0x10 => { unimplemented!("Jump to"); },
-            0x20 => { unimplemented!("Call"); },
+            0x20 => { self.call(value, second, address);  address_changed = true; },
             0x30 => { unimplemented!("Skip if equal (constant)"); },
             0x40 => { unimplemented!("Skip if not equal (constant)"); },
             0x50 => { unimplemented!("Skip if equal (to register)"); },
@@ -69,15 +69,25 @@ impl System {
         }
     }
 
+    fn call(&mut self, first_part: u8, second_part: u8, original_address: u16) {
+        self.stack[self.stack_pointer as usize] = original_address;
+        self.stack_pointer = self.stack_pointer + 1;
+
+        let top_value: u16 = ((first_part & 0x0F) as u16) * 256;
+        let total_value = top_value + (second_part as u16);
+
+        self.program_counter = total_value;
+    }
+
     fn draw(&mut self, first_part: u8, second_part: u8) {
         let x_register = first_part & 0x0F;
         let y_register = (second_part & 0xF0) >> 4;
 
-        println!("Y Register: {}", y_register);
+        //println!("Y Register: {}", y_register);
         let height = second_part & 0x0F;
         let initial_height = self.registers[y_register as usize];
         let initial_width = self.registers[x_register as usize];
-        println!("Height: {}", height);
+        //println!("Height: {}", height);
         //Reset 0xF register
         self.registers[0xF] = 0;
 
@@ -85,10 +95,10 @@ impl System {
 
         for y in 0..height {
             let sprite_line = self.memory[(self.index_register + y as u16) as usize];
-            println!("{:x}", sprite_line);
+            //println!("{:x}", sprite_line);
             for x in 0..8 {
                 let pixel = sprite_line & (0x80 >> x);
-                println!("{:b}", pixel);
+                //println!("{:b}", pixel);
                 if pixel != 0{
                     //Pixel is now a colour
                     //TODO:Implement collision detection
