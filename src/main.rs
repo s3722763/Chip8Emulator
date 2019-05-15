@@ -34,8 +34,8 @@ fn main() {
     let mut chip8_system: System = System::default();
     let mut running = true;
 
-    //chip8_system.load_program(&String::from("pong.rom"));
-    chip8_system.load_program(&String::from("test.rom"));
+    chip8_system.load_program(&String::from("pong.rom"));
+    //chip8_system.load_program(&String::from("test.rom"));
 
     println!("{}", 0xB0 >> 4);
 

@@ -35,10 +35,6 @@ impl Default for System {
 }
 
 impl System {
-    fn get_next_op(&self) {
-
-    }
-
     pub fn run_op_at(&mut self, address: u16) {
         //TODO: Do check if there is an op code
         let value = self.memory[address as usize];
@@ -92,13 +88,18 @@ impl System {
             println!("{:x}", sprite_line);
             for x in 0..8 {
                 let pixel = sprite_line & (0x80 >> x);
-
+                println!("{:b}", pixel);
                 if pixel != 0{
                     //Pixel is now a colour
                     //TODO:Implement collision detection
                 }
                 println!("X: {}\tY: {}", x + initial_width as u16, y + initial_height);
-                self.screen[(x + initial_width as u16) as usize][(y + initial_height) as usize] = pixel;
+                let new_x = x + initial_width as u16;
+                let new_y = y + initial_height;
+
+                if new_x < 64 && new_y < 32 {
+                    self.screen[new_x as usize][new_y as usize] = pixel;
+                }
             }
         }
     }
