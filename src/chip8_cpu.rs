@@ -70,9 +70,9 @@ impl System {
         println!("New op-code: {:x}{:x}\n", value, second);
         match first {
             0x00 => { self.process_0x_00(value, second); },
-            0x10 => { unimplemented!("Jump to"); },
+            0x10 => { self.jump(value, second); },
             0x20 => { self.call(value, second, address); },
-            0x30 => { unimplemented!("Skip if equal (constant)"); },
+            0x30 => { self.skip_if_equal(value, second); },
             0x40 => { unimplemented!("Skip if not equal (constant)"); },
             0x50 => { unimplemented!("Skip if equal (to register)"); },
             0x60 => { self.set_register_to(value, second); },
@@ -92,6 +92,16 @@ impl System {
 
         if !address_changed {
             self.program_counter = self.program_counter + 2;
+        }
+    }
+
+    fn skip_if_equal(&mut self, first: u8, value: u8) {
+        let register = first & 0x0F;
+        let register_value = self.registers[register as usize];
+
+        if value == register_value {
+            //Skip the next instruction as this adds to and when it returns 2 is also added
+            self.program_counter += 2;
         }
     }
 
@@ -121,11 +131,19 @@ impl System {
 
     fn process_0x_F0(&mut self, first_part: u8, second_part: u8) {
         match second_part {
+            0x07 => {
+                //Set VX to equal to delay timer
+                let register  = first_part & 0x0F;
+                self.registers[register as usize] = self.delay_timer;
+            },
             0x15 => {
-                let amount = first_part & 0x0F;
+                //Set delay timer to the value in VX
+                let register = first_part & 0x0F;
+                let amount = self.registers[register as usize];
                 self.delay_timer = amount;
             },
             0x29 => {
+                //Set index register to value sprite address what represents this value
                 let register = first_part & 0x0F;
                 let value = self.registers[register as usize];
                 //Is this ok?
@@ -133,6 +151,7 @@ impl System {
                 self.index_register = (value as u16) * 5;
             },
             0x33 => {
+                //Calculate the BCD for this value and store at where index register points to
                 let register = (first_part & 0xF0) >> 4;
                 let value = self.registers[register as usize];
                 let (hundreds, tens, ones) = encode_to_bcd(value);
@@ -157,15 +176,19 @@ impl System {
         }
     }
 
+    fn jump(&mut self, first_part: u8, second_part: u8) {
+        let top_value: u16 = ((first_part & 0x0F) as u16) * 256;
+        let total_value = top_value + (second_part as u16);
+
+        self.program_counter = total_value;
+    }
+
     fn call(&mut self, first_part: u8, second_part: u8, original_address: u16) {
         println!("Adding {} to stack", original_address);
         self.stack[self.stack_pointer as usize] = original_address;
         self.stack_pointer = self.stack_pointer + 1;
 
-        let top_value: u16 = ((first_part & 0x0F) as u16) * 256;
-        let total_value = top_value + (second_part as u16);
-
-        self.program_counter = total_value;
+        self.jump(first_part, second_part);
     }
 
     fn draw(&mut self, first_part: u8, second_part: u8) {
