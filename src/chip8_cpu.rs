@@ -66,7 +66,8 @@ impl System {
         let first =  value & 0xF0;
         let mut address_changed = false;
         let second = self.memory[(address + 1) as usize];
-        println!("New Address: {:x}{:x}", value, second);
+        println!("New address : {}", address);
+        println!("New op-code: {:x}{:x}\n", value, second);
         match first {
             0x00 => { self.process_0x_00(value, second); },
             0x10 => { unimplemented!("Jump to"); },
@@ -104,10 +105,11 @@ impl System {
 
         match second_part {
             0xEE => {
-                let new_address = self.stack[self.stack_pointer as usize];
                 self.stack_pointer -= 1;
+                let new_address = self.stack[self.stack_pointer as usize];
 
                 self.program_counter = new_address;
+                println!("Returning to: {}", new_address);
             },
             _ => {
                 unimplemented!("0x00 opcode not implemented");
@@ -119,6 +121,10 @@ impl System {
 
     fn process_0x_F0(&mut self, first_part: u8, second_part: u8) {
         match second_part {
+            0x15 => {
+                let amount = first_part & 0x0F;
+                self.delay_timer = amount;
+            },
             0x29 => {
                 let register = first_part & 0x0F;
                 let value = self.registers[register as usize];
@@ -152,6 +158,7 @@ impl System {
     }
 
     fn call(&mut self, first_part: u8, second_part: u8, original_address: u16) {
+        println!("Adding {} to stack", original_address);
         self.stack[self.stack_pointer as usize] = original_address;
         self.stack_pointer = self.stack_pointer + 1;
 
