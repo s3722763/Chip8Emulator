@@ -70,7 +70,7 @@ impl System {
         match first {
             0x00 => { self.process_0x_00(value, second); },
             0x10 => { unimplemented!("Jump to"); },
-            0x20 => { self.call(value, second, address);  address_changed = true; },
+            0x20 => { self.call(value, second, address); },
             0x30 => { unimplemented!("Skip if equal (constant)"); },
             0x40 => { unimplemented!("Skip if not equal (constant)"); },
             0x50 => { unimplemented!("Skip if equal (to register)"); },
@@ -107,6 +107,7 @@ impl System {
                 let new_address = self.stack[self.stack_pointer as usize];
                 self.stack_pointer -= 1;
 
+                self.program_counter = new_address;
             },
             _ => {
                 unimplemented!("0x00 opcode not implemented");
