@@ -1,5 +1,8 @@
 extern crate sdl2;
 
+#[cfg(debug_assertions)]
+mod debug;
+
 mod chip8_cpu;
 
 use chip8_cpu::System;
@@ -38,10 +41,20 @@ fn main() {
     chip8_system.setup_fontset();
 
     let (mut canvas, mut event_pipe) = setup_window();
+    let mut terminal = None;
+
+    if cfg!(debug_assertions) {
+        terminal =  Some(debug::setup_debug_ui());
+    }
 
     'running: loop {
-        chip8_system.run_op_at(chip8_system.program_counter);
+        if cfg!(debug_assertions) {
+            debug::update_and_display_debug_ui(&mut terminal.as_mut().unwrap(), &chip8_system);
+        }
 
+       //chip8_system.run_op_at(chip8_system.program_counter);
+
+        /**Handle SDL2 events and drawing**/
         canvas.clear();
         for event in event_pipe.poll_iter() {
             match event {

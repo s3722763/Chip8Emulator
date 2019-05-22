@@ -51,3 +51,7 @@ fn test_set_index_register() {
 }
 
 //TODO: Implement screen test
+#[test]
+fn test_graphics() {
+    let mut chip = System::default();
+}

@@ -8,12 +8,12 @@ pub struct System {
     pub index_register: u16,
     pub program_counter: u16,
     pub screen: [[u8;32];64],
-    delay_timer: u8,
-    sound_timer: u8,
+    pub delay_timer: u8,
+    pub sound_timer: u8,
     key: [u8;16],
     //For Emulation
-    stack: [u16;16],
-    stack_pointer: u8,
+    pub stack: [u16;16],
+    pub stack_pointer: u8,
 }
 
 impl Default for System {
@@ -66,8 +66,8 @@ impl System {
         let first =  value & 0xF0;
         let mut address_changed = false;
         let second = self.memory[(address + 1) as usize];
-        println!("New address : {}", address);
-        println!("New op-code: {:x}{:x}\n", value, second);
+        //println!("New address : {}", address);
+        //println!("New op-code: {:x}{:x}\n", value, second);
         match first {
             0x00 => { self.process_0x_00(value, second); },
             0x10 => { self.jump(value, second); },
@@ -86,7 +86,7 @@ impl System {
             0xE0 => { unimplemented!("Key operations"); },
             0xF0 => { self.process_0x_F0(value, second); },
             _ => {
-                println!("Invalid opcode");
+                //println!("Invalid opcode");
             }
         }
 
@@ -119,7 +119,7 @@ impl System {
                 let new_address = self.stack[self.stack_pointer as usize];
 
                 self.program_counter = new_address;
-                println!("Returning to: {}", new_address);
+                //println!("Returning to: {}", new_address);
             },
             _ => {
                 unimplemented!("0x00 opcode not implemented");
@@ -184,7 +184,7 @@ impl System {
     }
 
     fn call(&mut self, first_part: u8, second_part: u8, original_address: u16) {
-        println!("Adding {} to stack", original_address);
+        //println!("Adding {} to stack", original_address);
         self.stack[self.stack_pointer as usize] = original_address;
         self.stack_pointer = self.stack_pointer + 1;
 
@@ -194,7 +194,7 @@ impl System {
     fn draw(&mut self, first_part: u8, second_part: u8) {
         let x_register = first_part & 0x0F;
         let y_register = (second_part & 0xF0) >> 4;
-
+        //println!("Draw");
         //println!("Y Register: {}", y_register);
         let height = second_part & 0x0F;
         let initial_height = self.registers[y_register as usize];
@@ -250,7 +250,7 @@ impl System {
                 }
             },
             Err(e) => {
-                println!("Could not load file");
+                //println!("Could not load file");
             }
         }
     }

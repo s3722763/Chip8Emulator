@@ -6,3 +6,5 @@ edition = "2018"
 
 [dependencies]
 sdl2 = "0.32.2"
+tui = "0.6.0"
+termion = "1.5"
