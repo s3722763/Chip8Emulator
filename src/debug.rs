@@ -53,5 +53,18 @@ pub fn update_and_display_debug_ui(terminal :&mut Terminal<tui::backend::Termion
             .block(Block::default().borders(Borders::ALL).title("Stack"))
             .start_corner(Corner::TopLeft)
             .render(&mut f, chunks[1]);
+
+        let mut system_status_vec: Vec<String> = Vec::new();
+        //TODO: Add more system status stuff
+        system_status_vec.push(format!("Program counter: {:X}", current_instruction));
+
+        let system_status = system_status_vec.iter().map(|value| {
+            Text::raw(value)
+        });
+
+        List::new(system_status)
+            .block(Block::default().borders(Borders::ALL).title("System Status"))
+            .start_corner(Corner::TopLeft)
+            .render(&mut f, chunks[2]);
     }).expect("Error displaying debug ui");
 }

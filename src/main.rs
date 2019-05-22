@@ -52,8 +52,7 @@ fn main() {
             debug::update_and_display_debug_ui(&mut terminal.as_mut().unwrap(), &chip8_system);
         }
 
-       //chip8_system.run_op_at(chip8_system.program_counter);
-
+       chip8_system.run_op_at(chip8_system.program_counter);
         /**Handle SDL2 events and drawing**/
         canvas.clear();
         for event in event_pipe.poll_iter() {
