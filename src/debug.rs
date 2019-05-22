@@ -11,6 +11,7 @@ use tui::Terminal;
 
 use crate::chip8_cpu::System;
 use self::tui::layout::Corner;
+use std::io;
 
 /**Why does this return have to be so looooooooooooooooong**/
 pub fn setup_debug_ui() -> Terminal<tui::backend::TermionBackend<termion::screen::AlternateScreen<termion::input::MouseTerminal<termion::raw::RawTerminal<std::io::Stdout>>>>> {
