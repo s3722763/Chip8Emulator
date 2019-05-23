@@ -13,6 +13,8 @@ use sdl2::keyboard::Keycode;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
+use std::{thread, time};
+
 #[cfg(test)]
 pub mod tests;
 
@@ -76,6 +78,7 @@ fn main() {
         }
 
         canvas.present();
+        thread::sleep(time::Duration::from_secs(1));
     }
 
     /*for byte in chip8_system.memory[0x200..0x210].iter() {
