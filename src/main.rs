@@ -2,6 +2,8 @@ extern crate sdl2;
 
 #[cfg(debug_assertions)]
 mod debug;
+use tui::backend::RustboxBackend;
+use rustbox::keyboard::Key;
 
 mod chip8_cpu;
 
@@ -14,6 +16,7 @@ use sdl2::render::Canvas;
 use sdl2::video::Window;
 
 use std::{thread, time};
+use core::borrow::{BorrowMut, Borrow};
 
 #[cfg(test)]
 pub mod tests;
@@ -42,7 +45,7 @@ fn main() {
     //chip8_system.load_program(&String::from("test.rom"));
     chip8_system.setup_fontset();
 
-    let (mut canvas, mut event_pipe) = setup_window();
+    //let (mut canvas, mut event_pipe) = setup_window();
     let mut terminal = None;
 
     if cfg!(debug_assertions) {
@@ -51,11 +54,28 @@ fn main() {
 
     'running: loop {
         if cfg!(debug_assertions) {
-            debug::update_and_display_debug_ui(&mut terminal.as_mut().unwrap(), &chip8_system);
+            let mut t = terminal.as_mut().unwrap();
+
+            debug::update_and_display_debug_ui(&mut t, &chip8_system);
+            println!("a");
+            //Check input events
+            match t.backend().rustbox().peek_event(time::Duration::from_millis(200), false) {
+                Ok(rustbox::Event::KeyEvent(key)) => match key {
+                    Key::Char(c) => match c{
+                        'q' => {
+                            break 'running;
+                        },
+                        _ => {println!("{}", c);}
+                    },
+                    _ => {println!("c");}
+                },
+                _ => {println!("d");}
+            };
         }
 
        chip8_system.run_op_at(chip8_system.program_counter);
         /**Handle SDL2 events and drawing**/
+        /*
         canvas.clear();
         for event in event_pipe.poll_iter() {
             match event {
@@ -77,7 +97,7 @@ fn main() {
             }
         }
 
-        canvas.present();
+        canvas.present();*/
         thread::sleep(time::Duration::from_secs(1));
     }
 

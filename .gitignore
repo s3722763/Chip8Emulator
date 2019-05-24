@@ -3,3 +3,4 @@
 /.idea
 SDL2.dll
 pong.rom
+Cargo.lock
