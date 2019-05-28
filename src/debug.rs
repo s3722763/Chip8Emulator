@@ -1,5 +1,6 @@
 extern crate tui;
 extern crate rustbox;
+extern crate termion;
 
 use tui::backend::RustboxBackend;
 use tui::layout::{Constraint, Direction, Layout};
@@ -7,11 +8,15 @@ use tui::style::{Style};
 use tui::widgets::{Block, List, Borders, Text, Widget};
 use tui::Terminal;
 
-use rustbox::keyboard::Key;
+use termion::input::Events;
+use termion::input::TermRead;
+use termion::event::Key;
 
 use crate::chip8_cpu::System;
 use self::tui::layout::Corner;
 use std::io;
+use std::any::Any;
+use std::io::stdin;
 
 /**Why does this return have to be so looooooooooooooooong**/
 pub fn setup_debug_ui() -> Terminal<tui::backend::RustboxBackend> {
@@ -23,7 +28,18 @@ pub fn setup_debug_ui() -> Terminal<tui::backend::RustboxBackend> {
 }
 
 pub fn update_and_display_debug_ui(terminal :&mut Terminal<tui::backend::RustboxBackend>,
-                               chip8_system: &System) {
+                               chip8_system: &System) -> bool {
+    let mut quit = false;
+    //Poll events
+    let key_input = stdin();
+    for c in key_input.keys() {
+        match c.unwrap() {
+            Key::Char('q') => { quit = true; }
+            _ => {}
+        }
+    }
+
+
     terminal.draw(|mut f| {
         let chunks = Layout::default().direction(Direction::Horizontal)
             .constraints([Constraint::Percentage(20), Constraint::Percentage(20), Constraint::Percentage(60)].as_ref())
@@ -70,6 +86,8 @@ pub fn update_and_display_debug_ui(terminal :&mut Terminal<tui::backend::Rustbox
             .start_corner(Corner::TopLeft)
             .render(&mut f, chunks[2]);
     }).expect("Error displaying debug ui");
+
+    quit
 }
 
 fn get_opcode_description(opcode_first: u8, opcode_second: u8, system: &System) -> String {

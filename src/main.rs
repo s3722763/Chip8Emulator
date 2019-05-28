@@ -56,21 +56,11 @@ fn main() {
         if cfg!(debug_assertions) {
             let mut t = terminal.as_mut().unwrap();
 
-            debug::update_and_display_debug_ui(&mut t, &chip8_system);
-            println!("a");
-            //Check input events
-            match t.backend().rustbox().peek_event(time::Duration::from_millis(200), false) {
-                Ok(rustbox::Event::KeyEvent(key)) => match key {
-                    Key::Char(c) => match c{
-                        'q' => {
-                            break 'running;
-                        },
-                        _ => {println!("{}", c);}
-                    },
-                    _ => {println!("c");}
-                },
-                _ => {println!("d");}
-            };
+            let quit = debug::update_and_display_debug_ui(&mut t, &chip8_system);
+
+            if quit {
+                break 'running;
+            }
         }
 
        chip8_system.run_op_at(chip8_system.program_counter);
