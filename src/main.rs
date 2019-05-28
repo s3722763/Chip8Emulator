@@ -52,18 +52,30 @@ fn main() {
         terminal =  Some(debug::setup_debug_ui());
     }
 
+    let mut break_program = false;
+
     'running: loop {
         if cfg!(debug_assertions) {
             let mut t = terminal.as_mut().unwrap();
 
-            let quit = debug::update_and_display_debug_ui(&mut t, &chip8_system);
+            let (quit, switch_break) = debug::update_and_display_debug_ui(&mut t, &chip8_system, break_program);
+
+            if switch_break {
+                if break_program == false {
+                    break_program = true;
+                } else if break_program == true {
+                    break_program = false;
+                }
+            }
 
             if quit {
                 break 'running;
             }
         }
 
-       chip8_system.run_op_at(chip8_system.program_counter);
+        if !break_program {
+            chip8_system.run_op_at(chip8_system.program_counter);
+        }
         /**Handle SDL2 events and drawing**/
         /*
         canvas.clear();

@@ -28,13 +28,15 @@ pub fn setup_debug_ui() -> Terminal<tui::backend::RustboxBackend> {
 }
 
 pub fn update_and_display_debug_ui(terminal :&mut Terminal<tui::backend::RustboxBackend>,
-                               chip8_system: &System) -> bool {
+                               chip8_system: &System, program_break: bool) -> (bool, bool) {
     let mut quit = false;
+    let mut change_break = false;
     //Poll events
     let key_input = stdin();
     for c in key_input.keys() {
         match c.unwrap() {
-            Key::Char('q') => { quit = true; }
+            Key::Char('q') => { quit = true; },
+            Key::Char('b') => { change_break = true; },
             _ => {}
         }
     }
@@ -77,6 +79,12 @@ pub fn update_and_display_debug_ui(terminal :&mut Terminal<tui::backend::Rustbox
         system_status_vec.push(format!("Current instruction: {}", current_instruction));
         system_status_vec.push(format!("Current instruction description: {}", instruction_description));
 
+        if program_break {
+            system_status_vec.push(format!("{}", "Program has paused executing"));
+        } else {
+            system_status_vec.push(format!("{}", "Program is executing instructions"));
+        }
+
         let system_status = system_status_vec.iter().map(|value| {
             Text::raw(value)
         });
@@ -87,7 +95,7 @@ pub fn update_and_display_debug_ui(terminal :&mut Terminal<tui::backend::Rustbox
             .render(&mut f, chunks[2]);
     }).expect("Error displaying debug ui");
 
-    quit
+    (quit, change_break)
 }
 
 fn get_opcode_description(opcode_first: u8, opcode_second: u8, system: &System) -> String {
